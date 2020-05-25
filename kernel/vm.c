@@ -6,8 +6,63 @@
 #include "defs.h"
 #include "fs.h"
 
+#define TRUE 1
+#define FALSE 0
+
+// declare data structures to distinguish in which
+// states each segement of physical addresses belongs to
+
+// physical frame reference count array (of which PTE points to)
+int ref_count[(PHYSTOP - KERNBASE) / PGSIZE];
+
+// refactoring
+int isValidPaddr(uint64 paddr)
+{
+  if (paddr < KERNBASE || paddr > PHYSTOP)
+    // return false if paddr is in invalid range
+    return FALSE;
+  else
+    // return true if paddr is in valid range
+    return TRUE;
+}
+
+int findIndex(uint64 paddr)
+{
+  if (isValidPaddr(paddr))
+    // addresss valid, find the proper index and return
+    return ((paddr - KERNBASE) / (uint64)(PGSIZE));
+  else
+    // invalid
+    return -1;
+}
+
+// refence increment
+void refCountInc(uint64 paddr)
+{
+  int index = -1;
+  if ((index = findIndex(paddr)) != -1)
+    ref_count[index]++;
+}
+
+// refence decrement
+void refCountDec(uint64 paddr)
+{
+  int index = -1;
+  if ((index = findIndex(paddr)) != -1)
+    ref_count[index]--;
+}
+
+// reference getter
+int getRefCount(uint64 paddr)
+{
+  int index = -1;
+  if ((index = findIndex(paddr)) != -1)
+    return ref_count[index];
+  return -1;
+}
+
 /*
- * the kernel's page table.
+ * the kernel's page tabl.
  */
 pagetable_t kernel_pagetable;
 
