@@ -62,7 +62,7 @@ int getRefCount(uint64 paddr)
 }
 
 /*
- * the kernel's page tabl.
+ * the kernel's page table.
  */
 pagetable_t kernel_pagetable;
 
@@ -290,7 +290,7 @@ void uvminit(pagetable_t pagetable, uchar *src, uint sz)
 // Allocate PTEs and physical memory to grow process from oldsz to
 // newsz, which need not be page aligned.  Returns new size or 0 on error.
 uint64
-uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz)
+uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz, uint writable)
 {
   char *mem;
   uint64 a;
