@@ -302,6 +302,7 @@ uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz, uint writable)
   a = oldsz;
   for (; a < newsz; a += PGSIZE)
   {
+    // allocate physical frame
     mem = kalloc();
     if (mem == 0)
     {
@@ -309,12 +310,34 @@ uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz, uint writable)
       return 0;
     }
     memset(mem, 0, PGSIZE);
-    if (mappages(pagetable, a, PGSIZE, (uint64)mem, PTE_W | PTE_X | PTE_R | PTE_U) != 0)
+
+    // here where the difference takes place (depends on whether the flags are set or not)
+    // generate pagetable corresponsds to the proper permission bits
+
+    if (writable)
+    // non text segment
     {
-      kfree(mem);
-      uvmdealloc(pagetable, a, oldsz);
-      return 0;
+      if (mappages(pagetable, a, PGSIZE, (uint64)mem, PTE_X | PTE_R | PTE_U | PTE_W) != 0)
+      {
+        // err
+        kfree(mem);
+        uvmdealloc(pagetable, a, oldsz);
+        return 0;
+      }
     }
+    else
+    // text segment
+    {
+      if (mappages(pagetable, a, PGSIZE, (uint64)mem, PTE_X | PTE_R | PTE_U) != 0)
+      {
+        // err
+        kfree(mem);
+        uvmdealloc(pagetable, a, oldsz);
+        return 0;
+      }
+    }
+
+    refCountInc((uint64)mem);
   }
   return newsz;
 }
