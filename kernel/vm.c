@@ -12,6 +12,8 @@
 // declare data structures to distinguish in which
 // states each segement of physical addresses belongs to
 
+// check whether the segment is .text segment or not to prevent from being COWed
+int is_text_segment[(PHYSTOP - KERNBASE) / PGSIZE];
 // physical frame reference count array (of which PTE points to)
 int ref_count[(PHYSTOP - KERNBASE) / PGSIZE];
 
@@ -59,6 +61,31 @@ int getRefCount(uint64 paddr)
   if ((index = findIndex(paddr)) != -1)
     return ref_count[index];
   return -1;
+}
+
+// check if the given physical address is in .text segment
+int check_text_segment(uint64 paddr)
+{
+  int index = -1;
+  if ((index = findIndex(paddr)) != -1)
+    return is_text_segment[index];
+  return 1;
+}
+
+// set the given physical frame to .text segment (READ ONLY segment)
+void set_text_segment(uint64 paddr)
+{
+  int index = -1;
+  if ((index = findIndex(paddr)) != -1)
+    is_text_segment[index] = 1;
+}
+
+// unset the given physical frame to .text segment (READ ONLY segment)
+void unset_text_segment(uint64 paddr)
+{
+  int index = -1;
+  if ((index = findIndex(paddr)) != -1)
+    is_text_segment[index] = 0;
 }
 
 /*
