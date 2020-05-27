@@ -277,7 +277,10 @@ void uvmunmap(pagetable_t pagetable, uint64 va, uint64 size, int do_free)
     if (do_free)
     {
       pa = PTE2PA(*pte);
-      kfree((void *)pa);
+      refCountDec(pa);
+      // no reference exist anymore
+      if (getRefCount(pa) == 0)
+        kfree((void *)pa);
     }
     *pte = 0;
     if (a == last)
