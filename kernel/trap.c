@@ -86,6 +86,13 @@ void usertrap(void)
 
     uint64 paddr = PTE2PA(*pte);
 
+    // .text segment cannot be modified
+    if (check_text_segment(paddr))
+    {
+      p->killed = 1;
+      exit(-1);
+    }
+
     int flags = PTE_FLAGS(*pte);
     int refCount = getRefCount(paddr);
 

@@ -180,6 +180,10 @@ void refCountInc(uint64);
 void refCountDec(uint64);
 int getRefCount(uint64);
 
+int check_text_segment(uint64);
+void set_text_segment(uint64);
+void unset_text_segment(uint64);
+
 #ifdef SNU
 void freewalk(pagetable_t);
 uint64 v2p(pagetable_t, uint64);

@@ -355,6 +355,7 @@ uvmalloc(pagetable_t pagetable, uint64 oldsz, uint64 newsz, uint writable)
     else
     // text segment
     {
+      set_text_segment((uint64)mem);
       if (mappages(pagetable, a, PGSIZE, (uint64)mem, PTE_X | PTE_R | PTE_U) != 0)
       {
         // err
